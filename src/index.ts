@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import userRoute from './routes/users/user.js';
 import PostsRoute from './routes/posts/index.js';
 import { logRequest } from './middleware/index.js';
+import AuthRoute from './routes/auth/index.js';
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(logRequest);
 
 app.use('/posts', PostsRoute);
 app.use('/users', userRoute);
+app.use('/auth', AuthRoute);
 
 app.get('/', (req: Request, res: Response): Response => {
   return res.send('Hello, TypeScript Express!');
