@@ -3,16 +3,19 @@ import { responseData, responseFailed, responseNotFound, responseSuccess } from 
 import prisma from '../../models/prisma.js';
 
 const getAllUsers = async (req: Request, res: Response): Promise<Response> => {
-  const data = await prisma.user.findMany()
+  const data = await prisma.users.findMany({ include: { posts: true } })
   return responseData(res, data)
 };
 
 const getUserByID = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
-  const readUserByID = await prisma.user.findUnique({
+  const id = req.params.id
+  const readUserByID = await prisma.users.findUnique({
     where: {
       id,
     },
+    include: {
+      posts: true
+    }
   })
   if (!readUserByID) {
     return responseNotFound(res)
@@ -21,11 +24,12 @@ const getUserByID = async (req: Request, res: Response) => {
 }
 
 const createUser = async (req: Request, res: Response) => {
-  const user = await prisma.user.create({
+  const user = await prisma.users.create({
     data: {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
+      role: req.body.role,
     },
   })
   if (!user) return responseFailed(res)
@@ -33,14 +37,16 @@ const createUser = async (req: Request, res: Response) => {
 }
 
 const updateUser = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
-  const data = await prisma.user.update({
+  const id = req.params.id
+  const data = await prisma.users.update({
     where: {
       id,
     },
     data: {
       name: req.body.name,
       email: req.body.email,
+      password: req.body.password,
+      role: req.body.role,
     }
   })
   if (data) return responseData(res, data)
@@ -48,20 +54,14 @@ const updateUser = async (req: Request, res: Response) => {
 }
 
 const deleteUser = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
-  console.log({ id });
-  try {
-    const data = await prisma.user.delete({
-      where: {
-        id,
-      },
-    })
-    console.log({ data });
-    if (data) return responseSuccess(res)
-    return responseNotFound(res)
-  } catch (error) {
-    console.log(error);
-  }
+  const id = req.params.id
+  const data = await prisma.users.delete({
+    where: {
+      id,
+    },
+  })
+  if (data) return responseSuccess(res)
+  return responseNotFound(res)
 }
 
 export { getAllUsers, getUserByID, createUser, updateUser, deleteUser };
